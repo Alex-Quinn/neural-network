@@ -1,0 +1,67 @@
+--------------------
+ Experimental Steps
+--------------------
+Concept:
+    The goal of my experiment was to create different neural networks to learn to classify handwritten digits. I tested three different networks including a network with no hidden layer, a network with one hidden layer, and a custom network. To test each network I used k-fold cross validation (k=10). I compared the networks using paired t-tests to test for significance between the networks. 
+
+Process data:
+    In order to prepare the data for the experiment I needed to partition the data according to a k-fold cross validation scheme. I used a python script (partitioner.py) on the bitmap dataset to create 10 test files and 10 training files (k=10). The resulting files are stored in ./data/test/ and ./data/train.
+
+Running test:
+    If running the tests manually, you will notice three different digit_classifier_*.py files. These each correspond to the different network schemes. Each script is the exact same with the exception of the code that build the neural network. Each files takes two arguments: train data file and test data file. Running the python script will cycle through one training and testing sequence and output the mean squared error rate.
+
+    A quick way to run the tests is to run the provided bash script: run_all_tests.sh. This script will run through ten sets of training cycles for each network scheme and output the result to text files. Essentially the script will run:
+
+            python digit_classifier_no_hidden.py data/train/train_1 data/test/test_1
+            python digit_classifier_no_hidden.py data/train/train_2 data/test/test_2
+            ...
+            python digit_classifier_no_hidden.py data/train/train_10 data/test/test_10
+
+            python digit_classifier_one_hidden.py data/train/train_1 data/test/test_1
+            python digit_classifier_one_hidden.py data/train/train_2 data/test/test_2
+            ...
+            python digit_classifier_one_hidden.py data/train/train_10 data/test/test_10
+            
+            python digit_classifier_custom.py data/train/train_1 data/test/test_1
+            python digit_classifier_custom.py data/train/train_2 data/test/test_2
+            ...
+            python digit_classifier_custom.py data/train/train_10 data/test/test_10
+
+    The output of these commands are piped to labeled text files in the working directory.
+
+Statistical Analysis:
+    Because the goal of this experiment was to compare the multiple network schemes to each other I performed a paired t-test on all the combinations of schemes. I did t-tests for:
+        No hidden layer vs. one hidden layer
+        No hidden layer vs. custom network
+        One hidden layer vs. custom network
+
+    These tests showed whether or not the differences between the three networks were statistically significant.
+
+    While Excel has a paired t-test function, I chose to perform the tabulation by hand (using Excel) in order to better understand the calculation. I first calculated average accuracy, sample variance, and the T value for a 95% confidence interval. Using this data, I was able to calculate a 95% confidence interval for the experiment for each network scheme combination. If the confidence interval included 0 then I concluded that the difference between the network schemes was not significantly significant. If the confidence interval did not include 0 then I concluded that the difference was significantly significant.
+
+--------------------
+   Network Design
+--------------------
+In order to design the neural networks found in this experiment, I focused primarily on modeling the network in a way that complimented the data. I designed two networks beyond the naive input-output network.
+
+One hidden layer:
+    I decided to use 64 nodes in the hidden layer for this network scheme. Every node in the hidden layer is connected to every node in both the input layer and the output layer. While this is a relatively simple design I hoped that it would utilize the one hidden layer with the most effectiveness by considering all the input nodes in each hidden layer node.
+
+Custom network:
+    When designing the custom network I was focusing on modeling the network in a way that would complement the dataset. Specifically the bitmap dataset gives a block of 8x8 pixels as an input. The goal of the network is to classify this input into one of ten categories. In order to accomplish this I considered only sub-chunks of the input block at various points in the hidden layers. I first broke the 8x8 matrix into 4x4 matrices and then into 2x2 matrices. This is a similar approach that was explained in lecture. I hoped that this approach would allow the network to not rely on outlying data in the input. Rather, this scheme allows for smaller subs-chunks of the input data to act independently from other sub-chunks to form the output classification.
+
+--------------------
+      Results
+--------------------
+A numerical collection of my results can be found in this directory in "results.xlsx" or "none_v_one.pdf", "none_v_custom.pdf", and "one_v_custom.pdf". The equations used can be found in the "Is hypothesis h1’s error rate different from that of h2?" section of the lecture 7 notes on the "Methodology for performing ML studies" (http://people.cs.pitt.edu/~hwa/cs1675/01.30.2014.pdf).
+
+In more general terms, I found that there was no statistical significance between any of the three networks. However, I found that each network performed generally better than the "simpler" network before it. The initial network without a hidden layer performed with an average mean squared error of 4.8%. My custom network in comparison performed with a average mean squared error of 0.8%.
+
+--------------------
+      Analysis
+--------------------
+The goal of this experiment was to show a statistical significance in the various network scheme and in this sense the experiment failed. However, I believe that the networks I tested were moving in the right direction. The initial error rate of 4.8% is already extremely good. Improving from that would take more fine tuning than I was able to do in the short time frame. If I were to make more adjustments I would focus the network with one hidden layer as well as the custom network.
+
+In the case of the one hidden layer, I think that reducing the number of hidden layer nodes as well as reducing the number of connections between the input layer and the hidden layer could produce better results. This simpler network would allow for sub-sections of the input bitmap to be considered independently of one another.
+
+In the case of the custom network, improvement would essentially mean achieving and error rate of 0%. While this may be possible it would take very precise adjustments in the network. One such adjustment would be to remove the second hidden layer (representing the 2x2 matrices) in favor of another layer that represents the 4x4 matrices. The 2x2 matrix representation may be too small of a granularity to provide constructive input into the output nodes.
